@@ -1,0 +1,18 @@
+{{ if .Values.virtualservice_internal.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.metadata.namespace }}
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - {{ .Chart.Name }}
+  http:
+    - route:
+        - destination:
+            host: {{ .Chart.Name }}
+            port:
+              number: {{ .Values.configmap.PORT }}
+{{ end }}
