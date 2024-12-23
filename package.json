@@ -1,0 +1,61 @@
+{
+  "name": "node-template",
+  "version": "0.0.1",
+  "description": "node-project",
+  "main": "index.mjs",
+  "engines": {
+    "node": ">=22.4.1"
+  },
+  "scripts": {
+    "lint": "eslint --config eslint.config.mjs .",
+    "load-secrets": "npx psl render .env.template --awsprofile psl > .env",
+    "start": "npx dotenvx run --env-file=.env -- nodemon index.mjs",
+    "start:production": "node index.mjs",
+    "test": "npm run test:pipeline",
+    "test:pipeline": "npx dotenvx run --env-file=.env.test -- node --test --require './tests/helpers/hooks.cjs' 'tests/**/*.test.mjs'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AioliOrgTest/node-template"
+  },
+  "author": "AioliOrgTest",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@dotenvx/dotenvx": "^1.25.1",
+    "@eslint/js": "^9.13.0",
+    "@skillsoft-security-chapter/percipiosecretloader": "^3.1.3",
+    "@stylistic/eslint-plugin-js": "^2.9.0",
+    "chai": "^5.1.1",
+    "eslint": "^9.12.0",
+    "globals": "^15.11.0",
+    "nock": "13.5.6",
+    "nodemon": "^3.1.7",
+    "quibble": "^0.9.2",
+    "supertest": "7.0.0"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.54.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.56.0",
+    "@opentelemetry/exporter-prometheus": "^0.56.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.56.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.56.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.56.0",
+    "@opentelemetry/instrumentation": "^0.56.0",
+    "@opentelemetry/resource-detector-aws": "^1.9.0",
+    "@opentelemetry/resource-detector-container": "^0.5.2",
+    "@opentelemetry/resource-detector-gcp": "^0.31.0",
+    "@opentelemetry/resources": "^1.29.0",
+    "@opentelemetry/sdk-metrics": "^1.29.0",
+    "@opentelemetry/sdk-node": "^0.56.0",
+    "@opentelemetry/winston-transport": "^0.9.0",
+    "compression": "1.7.5",
+    "cookie-parser": "1.4.7",
+    "cors": "2.8.5",
+    "express": "^4.21.1",
+    "helmet": "8.0.0",
+    "joi": "17.13.3",
+    "winston": "3.17.0"
+  }
+}
