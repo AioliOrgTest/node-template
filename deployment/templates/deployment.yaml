@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.metadata.namespace }}
+spec:
+  replicas: {{ if eq .Values.envState "standby" }}0{{ else }}{{ .Values.replica_count }}{{ end }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy.max_surge }}
+      maxUnavailable: {{ .Values.strategy.max_unavailable }}
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        sidecar.istio.io/inject: 'true'
+      {{- if .Values.annotations.enabled }}
+      annotations:
+        {{- range $k, $v :=  .Values.annotations.dot_skillsoft | fromJson }}
+        {{ $k }}: {{ $v | quote }}
+        {{- end }}
+      {{- end }}
+        
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: {{ .Chart.Name }}-env
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: {{ .Chart.Name }}-env
+      containers:
+      - envFrom:
+          - configMapRef:
+              name: {{ .Chart.Name }}-env
+        image: {{ .Values.container.image.repository }}/{{ .Chart.Name }}:{{ .Values.container.image.tag }}
+        name: {{ .Chart.Name }}
+        imagePullPolicy: {{ .Values.container.image_pull_policy }}
+        env:
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Chart.Name }}
+          - name: OTEL_RESOURCE_ATTRIBUTES_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: OTEL_RESOURCE_ATTRIBUTES_POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          - name: OTEL_TRACES_SAMPLER
+            value: parentbased_traceidratio
+          - name: OTEL_TRACES_SAMPLER_ARG
+            value: "1"
+          - name: OTEL_PROPAGATORS
+            value: tracecontext,baggage,b3
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: http://otel-lb-collector.observability.svc.cluster.local:4317
+          - name: OTEL_RESOURCE_ATTRIBUTES_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: NODE_OPTIONS
+            value: "--experimental-loader=@opentelemetry/instrumentation/hook.mjs --import ./app/lib/opentelemetry/instrumentation.mjs"
+        ports:
+        - containerPort: {{ .Values.configmap.PORT }}
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            memory: {{ .Values.resources.memory.limit }}
+            cpu: {{ .Values.resources.cpu.limit }}
+          requests:
+            memory: {{ .Values.resources.memory.request }}
+            cpu: {{ .Values.resources.cpu.request }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.readinessProbe.httpGet.path }}
+            port: {{ .Values.readinessProbe.httpGet.port }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.livenessProbe.port }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
