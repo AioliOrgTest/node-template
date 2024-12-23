@@ -1,0 +1,16 @@
+newrelic:
+  labels: null 
+
+container:
+  image:
+    repository: 510467250861.dkr.ecr.eu-west-1.amazonaws.com
+    tag: <+stage.variables.Dockertag>
+
+ingress_external:
+  host: manifest_not_included_in_this_profile
+
+ingress_restricted:
+  host: euw1-prod-node-template.percipio.com
+
+virtualservice_restricted:
+  host: euw1-prod-node-template.percipio.com
