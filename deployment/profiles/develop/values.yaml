@@ -1,0 +1,14 @@
+newrelic:
+  labels: 'Environment:AWS-Develop;Team:AioliOrgTest;Service:node-template' 
+
+ingress_external:
+  enabled: false
+  host: node-template.develop.squads-dev.com
+
+ingress_restricted:
+  enabled: true
+  host: node-template.develop.squads-dev.com
+
+virtualservice_restricted:
+  enabled: false
+  host: manifest_not_included_in_this_profile
