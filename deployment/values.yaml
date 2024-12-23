@@ -1,0 +1,73 @@
+replica_count: 1
+
+strategy:
+  max_surge: 1
+  max_unavailable: 1
+
+annotations:
+  enabled: true
+  dot_skillsoft: |
+     <+exportedVariables.getValue("pipeline.dotSkillsoft.Annotations")>
+envState: <+stage.variables.EnvState>
+
+container:
+  image_pull_policy: IfNotPresent
+  image:
+    repository: 510467250861.dkr.ecr.us-east-1.amazonaws.com
+    tag: <+stage.variables.Dockertag>
+
+resources:
+  cpu:
+    limit: 500m
+    request: 150m
+  memory:
+    limit: 512Mi
+    request: 128Mi
+
+metadata:
+  labels:
+    app: node-template
+  namespace: provisioning-services
+
+configmap:
+  enabled: true
+  PORT: '8080'
+  HOST: '0.0.0.0'
+  env: 'production'
+
+readinessProbe:
+  httpGet:
+    path: '/public/health/v1/ping'
+    port: 8080
+livenessProbe:
+  port: 8080
+  initialDelaySeconds: 5
+  timeoutSeconds: 1
+
+ingress_external:
+  enabled: false
+  host: must_override
+
+ingress_restricted:
+  enabled: false
+  host: must_override
+
+peerauthentication:
+  enabled: true
+
+verticalpodautoscaler:
+  enabled: true
+
+virtualservice_internal:
+  enabled: false
+
+virtualservice_restricted:
+  enabled: false
+  host: must_override
+
+newrelic:
+  enabled: true 
+  license_key: <+secrets.getValue("org.new-relic-license-key-<+env.name>")>
+  no_config_file: true
+  labels: must_override 
+  
