@@ -1,0 +1,13 @@
+{{ if .Values.peerauthentication.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.metadata.namespace }}
+spec:
+  mtls:
+    mode: PERMISSIVE
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+{{ end }}
