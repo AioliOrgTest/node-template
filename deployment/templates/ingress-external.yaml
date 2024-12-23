@@ -1,0 +1,21 @@
+{{ if .Values.ingress_external.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: external-nginx
+  name: {{ .Chart.Name }}-external
+  namespace: {{ .Values.metadata.namespace }}
+spec:
+  rules:
+    - host: {{ .Values.ingress_external.host }}
+      http:
+        paths:
+          - backend:
+              service:
+                name: {{ .Chart.Name }}
+                port:
+                  number: {{ .Values.configmap.PORT }}
+            path: /
+            pathType: Prefix
+{{ end }}
