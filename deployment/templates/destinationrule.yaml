@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ .Chart.Name }}
+spec:
+  host: {{ .Chart.Name }}
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: True
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 10
