@@ -1,0 +1,7 @@
+docker-compose.yaml
+Dockerfile
+node_modules
+README.md
+deployment
+Jenkinsfile
+.env
