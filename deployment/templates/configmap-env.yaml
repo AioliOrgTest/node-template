@@ -1,0 +1,14 @@
+{{ if .Values.configmap.enabled }}
+apiVersion: v1
+data:
+    NEW_RELIC_AGENT_ENABLED: '{{ .Values.newrelic.enabled }}'
+    NEW_RELIC_APP_NAME: '{{ .Chart.Name }}'
+    NEW_RELIC_LICENSE_KEY: '{{ .Values.newrelic.license_key }}'
+    NEW_RELIC_NO_CONFIG_FILE: '{{ .Values.newrelic.no_config_file }}'
+    NEW_RELIC_LABELS: '{{ .Values.newrelic.labels }}'
+
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-env
+  namespace: {{ .Values.metadata.namespace }}
+{{ end }}
